@@ -38,6 +38,11 @@ class MainViewModel(
             if (it is AudioUi.Base) it.copy() else AudioUi.Empty
         })*/
 
+        /*list[position] = (list[position] as AudioUi.Base).copy(isRun = !(list[position] as AudioUi.Base).isRun)
+        communication.map(list.map {
+            if (it is AudioUi.Base) it.copy() else AudioUi.Empty
+        })*/
+
         viewModelScope.launch(Dispatchers.IO) {
             audioInteractor.set(position).collect {
                 val uiList = it.map { audio ->
