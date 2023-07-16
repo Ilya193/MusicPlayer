@@ -9,7 +9,7 @@ import com.example.audioplayer.databinding.AudioItemBinding
 import com.example.audioplayer.databinding.AudioItemEmptyBinding
 
 interface Listeners {
-    fun onClickListeners(position: Int)
+    fun onClickListeners(position: Int, title: String)
 }
 
 class MusicsAdapter(
@@ -44,7 +44,7 @@ class MusicsAdapter(
         override fun bind(item: AudioUi) {
             view.nameAudio.text = if (item is AudioUi.Base) item.title else ""
             view.root.setOnClickListener {
-                listeners.onClickListeners(adapterPosition)
+                listeners.onClickListeners(adapterPosition, (getItem(adapterPosition) as AudioUi.Base).fullTitle)
             }
             /*if (item is AudioUi.Base) {
                 if (!item.isRun) view.isRun.setImageResource(R.drawable.ic_start)

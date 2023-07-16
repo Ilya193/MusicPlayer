@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity(), Listeners {
             permissionReadExternalStorage.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
         } else {
             viewModel.observe(this) {
-                log("$it")
                 musicsAdapter.submitList(it)
             }
             viewModel.getAllAudio()
@@ -72,8 +71,11 @@ class MainActivity : AppCompatActivity(), Listeners {
         binding.musics.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
     }
 
-    override fun onClickListeners(position: Int) {
+    override fun onClickListeners(position: Int, title: String) {
         //viewModel.set(position)
-        ContextCompat.startForegroundService(this, Intent(this, AudioService::class.java))
+        val intent = Intent(this, AudioService::class.java).apply {
+            putExtra("TITLE", title)
+        }
+        ContextCompat.startForegroundService(this, intent)
     }
 }

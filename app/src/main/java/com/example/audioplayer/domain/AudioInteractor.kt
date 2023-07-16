@@ -17,14 +17,14 @@ interface AudioInteractor {
                 it.forEach { audio ->
                     var index = 0
                     val title = audio.title
-                    var name = ""
+                    var filterTitle = ""
                     if (title.takeLast(3) == "mp3" || title.takeLast(3) == "mp4") {
-                        name =
+                        filterTitle =
                             title.substring(title.lastIndexOf("/") + 1, title.lastIndexOf("."))
                                 .replace("_", " ")
                     }
-                    if (name.isNotEmpty())
-                        musicsDomain.add(AudioDomain.Base(index++, name))
+                    if (filterTitle.isNotEmpty())
+                        musicsDomain.add(AudioDomain.Base(index++, filterTitle, title))
                 }
 
                 if (musicsDomain.isEmpty()) musicsDomain.add(AudioDomain.Empty)

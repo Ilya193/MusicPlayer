@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
 import com.example.audioplayer.R
+import com.example.audioplayer.core.log
 
 class AudioService : Service() {
 
@@ -20,6 +21,7 @@ class AudioService : Service() {
     private val musics = mutableListOf<Uri>()
 
     private var currentMusic = 0
+    private var isRun = false
 
     override fun onCreate() {
         super.onCreate()
@@ -43,10 +45,11 @@ class AudioService : Service() {
         }
     }
 
-    private fun settingMediaPlayer() {
+    private fun settingMediaPlayer(data: String = "") {
         mediaPlayer.stop()
         mediaPlayer.reset()
-        mediaPlayer.setDataSource(this, musics[currentMusic])
+        if (data.isNotEmpty()) mediaPlayer.setDataSource(this, musics[musics.indexOf(Uri.parse(data))])
+        else mediaPlayer.setDataSource(this, musics[currentMusic])
         mediaPlayer.prepare()
         mediaPlayer.start()
     }
@@ -72,20 +75,23 @@ class AudioService : Service() {
             }
 
             else -> {
-                val notification = createNotification().build()
-
-                startForeground(1, notification)
-
-                mediaPlayer.setDataSource(this, musics[currentMusic])
-                mediaPlayer.prepare()
-                mediaPlayer.setOnCompletionListener {
-                    it.stop()
-                    it.reset()
-                    it.setDataSource(this, musics[++currentMusic])
-                    it.prepare()
-                    it.start()
+                if (isRun) {
+                    settingMediaPlayer(intent?.getStringExtra("TITLE") ?: "")
                 }
-                mediaPlayer.start()
+                else {
+                    mediaPlayer.setOnCompletionListener {
+                        it.stop()
+                        it.reset()
+                        it.setDataSource(this, musics[++currentMusic])
+                        it.prepare()
+                        it.start()
+                    }
+                    settingMediaPlayer(intent?.getStringExtra("TITLE") ?: "")
+
+                    val notification = createNotification().build()
+                    startForeground(1, notification)
+                }
+                isRun = true
             }
         }
 
@@ -132,6 +138,7 @@ class AudioService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        isRun = false
         mediaPlayer.stop()
         mediaPlayer.release()
     }

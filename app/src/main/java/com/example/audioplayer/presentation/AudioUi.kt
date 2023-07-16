@@ -10,6 +10,7 @@ sealed class AudioUi : Comparing<AudioUi> {
     data class Base(
         private val id: Int,
         val title: String,
+        val fullTitle: String,
         var isRun: Boolean,
     ) : AudioUi() {
         override fun same(item: AudioUi): Boolean {
