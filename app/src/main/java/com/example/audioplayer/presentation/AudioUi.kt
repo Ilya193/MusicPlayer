@@ -2,17 +2,19 @@ package com.example.audioplayer.presentation
 
 import com.example.audioplayer.core.Comparing
 
-sealed class AudioUi : Comparing<AudioUi> {
-
+sealed class AudioUi(
+    open val title: String = "",
+    open val fullTitle: String = ""
+) : Comparing<AudioUi> {
     override fun same(item: AudioUi): Boolean = false
     override fun sameContent(item: AudioUi): Boolean = false
 
     data class Base(
         private val id: Int,
-        val title: String,
-        val fullTitle: String,
-        var isRun: Boolean,
-    ) : AudioUi() {
+        override val title: String,
+        override val fullTitle: String,
+        private val isRun: Boolean,
+    ) : AudioUi(title, fullTitle) {
         override fun same(item: AudioUi): Boolean {
             return item is Base && id == item.id
         }

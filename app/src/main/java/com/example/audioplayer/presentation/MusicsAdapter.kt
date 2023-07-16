@@ -42,9 +42,9 @@ class MusicsAdapter(
     inner class MusicViewHolder(private val view: AudioItemBinding) :
         BaseMusicViewHolder(view.root) {
         override fun bind(item: AudioUi) {
-            view.nameAudio.text = if (item is AudioUi.Base) item.title else ""
+            view.nameAudio.text = item.title
             view.root.setOnClickListener {
-                listeners.onClickListeners(adapterPosition, (getItem(adapterPosition) as AudioUi.Base).fullTitle)
+                listeners.onClickListeners(adapterPosition, getItem(adapterPosition).fullTitle)
             }
             /*if (item is AudioUi.Base) {
                 if (!item.isRun) view.isRun.setImageResource(R.drawable.ic_start)

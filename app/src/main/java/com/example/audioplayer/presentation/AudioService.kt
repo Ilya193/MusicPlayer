@@ -1,7 +1,10 @@
 package com.example.audioplayer.presentation
 
+import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
@@ -9,7 +12,6 @@ import android.os.IBinder
 import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
 import com.example.audioplayer.R
-import com.example.audioplayer.core.log
 
 class AudioService : Service() {
 
@@ -120,8 +122,9 @@ class AudioService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentTitle("Test title")
-            .setContentText("Test text")
+            .setContentTitle("Title")
+            .setContentText("Text")
+            .setStyle(androidx.media.app.NotificationCompat.MediaStyle())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .addAction(
                 R.drawable.ic_skip_previous,
