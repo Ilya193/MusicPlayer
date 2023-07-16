@@ -48,8 +48,8 @@ class AudioService : Service() {
     private fun settingMediaPlayer(data: String = "") {
         mediaPlayer.stop()
         mediaPlayer.reset()
-        if (data.isNotEmpty()) mediaPlayer.setDataSource(this, musics[musics.indexOf(Uri.parse(data))])
-        else mediaPlayer.setDataSource(this, musics[currentMusic])
+        if (data.isNotEmpty()) currentMusic = musics.indexOf(Uri.parse(data))
+        mediaPlayer.setDataSource(this, musics[currentMusic])
         mediaPlayer.prepare()
         mediaPlayer.start()
     }
