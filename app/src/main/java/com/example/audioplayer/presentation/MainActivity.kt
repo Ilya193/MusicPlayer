@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity(), Listeners {
     }
 
     override fun onClickListeners(position: Int) {
-        //viewModel.set(position)
-        ContextCompat.startForegroundService(this, Intent(this, AudioService::class.java))
+        viewModel.set(position)
+        //ContextCompat.startForegroundService(this, Intent(this, AudioService::class.java))
     }
 }

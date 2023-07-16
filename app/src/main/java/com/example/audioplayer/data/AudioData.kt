@@ -6,6 +6,7 @@ import com.example.audioplayer.domain.AudioDomain
 data class AudioData(
     private val id: Int,
     val title: String,
+    var isRun: Boolean = false
 ) : ToMapper<AudioDomain> {
-    override fun map(): AudioDomain = AudioDomain.Base(id, title)
+    override fun map(): AudioDomain = AudioDomain.Base(id, title, isRun)
 }

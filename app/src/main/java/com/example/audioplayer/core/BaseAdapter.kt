@@ -16,7 +16,7 @@ abstract class BaseAdapter<T : Comparing<T>, E : BaseViewHolder<T>> : ListAdapte
 
 abstract class BaseViewHolder<T>(view: View) : RecyclerView.ViewHolder(view) {
     abstract fun bind(item: T)
-    //open fun bindRun() {}
+    open fun bindRun() {}
 
     class EmptyViewHolder(view: AudioItemEmptyBinding) : BaseViewHolder<AudioUi>(view.root) {
         override fun bind(item: AudioUi) {}

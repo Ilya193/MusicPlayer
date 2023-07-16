@@ -1,6 +1,7 @@
 package com.example.audioplayer.presentation
 
 import com.example.audioplayer.core.Comparing
+import com.example.audioplayer.core.log
 
 sealed class AudioUi : Comparing<AudioUi> {
 
@@ -18,11 +19,11 @@ sealed class AudioUi : Comparing<AudioUi> {
 
         override fun sameContent(item: AudioUi): Boolean = this == item
 
-        /* override fun changePayload(item: AudioUi): Any {
+        override fun changePayload(item: AudioUi): Any {
              if (item is Base && isRun != item.isRun)
                  return true
              return false
-         }*/
+         }
     }
 
     object Empty : AudioUi()

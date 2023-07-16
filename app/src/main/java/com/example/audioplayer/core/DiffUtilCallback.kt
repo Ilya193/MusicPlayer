@@ -11,7 +11,7 @@ class DiffUtilCallback<T : Comparing<T>> : DiffUtil.ItemCallback<T>() {
         return oldItem.sameContent(newItem)
     }
 
-    /*override fun getChangePayload(oldItem: T, newItem: T): Any? {
+    override fun getChangePayload(oldItem: T, newItem: T): Any? {
         return oldItem.changePayload(newItem)
-    }*/
+    }
 }

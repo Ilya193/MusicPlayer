@@ -37,6 +37,21 @@ class MainViewModel(
         communication.map(list.map {
             if (it is AudioUi.Base) it.copy() else AudioUi.Empty
         })*/
+
+        viewModelScope.launch(Dispatchers.IO) {
+            audioInteractor.set(position).collect {
+                val uiList = it.map { audio ->
+                    audio.map()
+                }
+                /*list = uiList.map {
+                    if (it is AudioUi.Base) it.copy() else AudioUi.Empty
+                }.toMutableList()
+                list = uiList.toMutableList()*/
+                withContext(Dispatchers.Main) {
+                    communication.map(uiList)
+                }
+            }
+        }
     }
 
     fun observe(lifecycleOwner: LifecycleOwner, observer: Observer<List<AudioUi>>) {

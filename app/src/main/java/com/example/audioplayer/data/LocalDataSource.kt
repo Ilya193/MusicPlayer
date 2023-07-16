@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.flow
 
 interface LocalDataSource {
     suspend fun getAllAudio(): Flow<List<AudioLocal>>
+    suspend fun set(position: Int): Flow<List<AudioLocal>>
 
     class Base(
         private val context: Context,
     ) : LocalDataSource {
+        private var list = mutableListOf<AudioLocal>()
         override suspend fun getAllAudio(): Flow<List<AudioLocal>> = flow {
             val musics = mutableListOf<AudioLocal>()
             context.contentResolver.query(
@@ -26,8 +28,14 @@ interface LocalDataSource {
                     val title = cursor.getString(data)
                     musics.add(AudioLocal(i++, title))
                 }
+                list = musics
                 emit(musics)
             }
+        }
+
+        override suspend fun set(position: Int): Flow<List<AudioLocal>> = flow {
+            list[position].isRun = !list[position].isRun
+            emit(list)
         }
     }
 }
