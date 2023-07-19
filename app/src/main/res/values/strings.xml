@@ -5,4 +5,6 @@
     <string name="stop">Stop</string>
     <string name="skip_next">Skip next</string>
     <string name="need_permission">Мне необходимо данное разрешение</string>
+    <string name="pause">pause</string>
+    <string name="close">close</string>
 </resources>

@@ -27,7 +27,7 @@ class App : Application() {
             val channel = NotificationChannel(
                 AudioService.CHANNEL_ID,
                 AudioService.CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(channel)
         }
