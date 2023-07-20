@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.audioplayer.R
-import com.example.audioplayer.core.log
 import com.example.audioplayer.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -25,23 +24,31 @@ class MainActivity : AppCompatActivity(), Listeners {
 
     private val permissionReadExternalStorage =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
-            if (!result) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (shouldShowRequestPermissionRationale(android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        Snackbar.make(
-                            binding.root,
-                            getString(R.string.need_permission),
-                            Snackbar.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            } else {
-                viewModel.observe(this) {
-                    musicsAdapter.submitList(it)
-                }
-                viewModel.getAllAudio()
+            permissionCheck(result, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+    private val permissionReadMediaAudio =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionCheck(result, android.Manifest.permission.READ_MEDIA_AUDIO)
             }
         }
+
+    private val permissionCheck: (Boolean, String) -> Unit = { result, permission ->
+        if (!result) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (shouldShowRequestPermissionRationale(permission)) {
+                    Snackbar.make(
+                        binding.root,
+                        getString(R.string.need_permission),
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+            }
+        } else {
+            settingViewModel()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,18 +58,35 @@ class MainActivity : AppCompatActivity(), Listeners {
     }
 
     private fun checkPermissions() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            permissionReadExternalStorage.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-        } else {
-            viewModel.observe(this) {
-                musicsAdapter.submitList(it)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.READ_MEDIA_AUDIO
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionReadMediaAudio.launch(android.Manifest.permission.READ_MEDIA_AUDIO)
+            } else {
+                settingViewModel()
             }
-            viewModel.getAllAudio()
         }
+        else {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionReadExternalStorage.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+            } else {
+                settingViewModel()
+            }
+        }
+    }
+
+    private fun settingViewModel() {
+        viewModel.observe(this) {
+            musicsAdapter.submitList(it)
+        }
+        viewModel.getAllAudio()
     }
 
     private fun setupRecyclerView() {

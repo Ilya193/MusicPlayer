@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.media.MediaMetadata
 import android.media.MediaPlayer
 import android.net.Uri
@@ -18,6 +17,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.audioplayer.R
+import com.example.audioplayer.core.log
 
 class AudioService : Service() {
 
@@ -74,19 +74,33 @@ class AudioService : Service() {
                     putExtra("ACTION", "pause")
                 }
                 val pausePendingIntent =
-                    PendingIntent.getService(this, 2, pause, PendingIntent.FLAG_UPDATE_CURRENT)
+                    PendingIntent.getService(
+                        this,
+                        2,
+                        pause,
+                        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+                    )
 
                 val notificationBuild = notification.build()
+
+                var state = PlaybackStateCompat.STATE_PLAYING
 
                 if (isRun) {
                     mediaPlayer.pause()
                     notificationBuild.actions[1] =
                         Notification.Action(R.drawable.ic_start, "pause", pausePendingIntent)
+                    state = PlaybackStateCompat.STATE_PAUSED
+
                 } else {
                     mediaPlayer.start()
                     notificationBuild.actions[1] =
                         Notification.Action(R.drawable.ic_pause, "pause", pausePendingIntent)
                 }
+
+                setPlaybackState(
+                    mediaPlayer.currentPosition.toLong(),
+                    state
+                )
 
                 isRun = !isRun
                 notificationManager.notify(1, notificationBuild)
@@ -142,16 +156,25 @@ class AudioService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun setPlaybackState(seekTo: Long? = null) {
+    private fun setPlaybackState(
+        seekTo: Long? = null,
+        state: Int = PlaybackStateCompat.STATE_PLAYING,
+    ) {
         var position = 0L
         if (seekTo != null) position = seekTo
         mediaSession.setPlaybackState(
             PlaybackStateCompat.Builder().setState(
-                PlaybackStateCompat.STATE_PLAYING,
+                state,
                 position,
                 1f
             )
-                .setActions(PlaybackStateCompat.ACTION_SEEK_TO)
+                .setActions(
+                    PlaybackStateCompat.ACTION_SEEK_TO
+                            or PlaybackStateCompat.ACTION_PLAY
+                            or PlaybackStateCompat.ACTION_PAUSE
+                            or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                            or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                )
                 .build()
         )
     }
@@ -193,16 +216,36 @@ class AudioService : Service() {
         }
 
         val skipPreviousPendingIntent =
-            PendingIntent.getService(this, 1, skipPrevious, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getService(
+                this,
+                1,
+                skipPrevious,
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+            )
 
         val pausePendingIntent =
-            PendingIntent.getService(this, 2, pause, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getService(
+                this,
+                2,
+                pause,
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+            )
 
         val skipNextPendingIntent =
-            PendingIntent.getService(this, 3, skipNext, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getService(
+                this,
+                3,
+                skipNext,
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+            )
 
         val stopPendingIntent =
-            PendingIntent.getService(this, 4, stop, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getService(
+                this,
+                4,
+                stop,
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+            )
 
         mediaSession = MediaSessionCompat(this, "TAG")
         setMetadata()
@@ -213,13 +256,39 @@ class AudioService : Service() {
                 mediaPlayer.seekTo(pos.toInt())
                 setPlaybackState(pos)
             }
+
+            override fun onSkipToNext() {
+                ContextCompat.startForegroundService(this@AudioService, skipNext)
+            }
+
+            override fun onSkipToPrevious() {
+                ContextCompat.startForegroundService(this@AudioService, skipPrevious)
+            }
+
+            override fun onPause() {
+                mediaPlayer.pause()
+                setPlaybackState(
+                    mediaPlayer.currentPosition.toLong(),
+                    PlaybackStateCompat.STATE_PAUSED
+                )
+            }
+
+            override fun onPlay() {
+                mediaPlayer.start()
+                setPlaybackState(
+                    mediaPlayer.currentPosition.toLong()
+                )
+            }
+
+            override fun onStop() {
+                ContextCompat.startForegroundService(this@AudioService, stop)
+            }
         })
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            .setColor(Color.WHITE)
             .setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setShowActionsInCompactView(0, 1, 2).setMediaSession(mediaSession.sessionToken)
