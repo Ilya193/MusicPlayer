@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".presentation.ListAudioFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/musics"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:translationY="50dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:background="#2E2B2B"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="invisible">
+
+        <TextView
+            android:id="@+id/titleAudio"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:gravity="center"/>
+
+        <ImageView
+            android:id="@+id/icSkipPrevious"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_skip_previous"
+            android:layout_gravity="center"/>
+
+        <ImageView
+            android:id="@+id/icPause"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_pause"
+            android:layout_gravity="center"
+            android:tag="1"/>
+
+        <ImageView
+            android:id="@+id/icSkipNext"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_skip_next"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

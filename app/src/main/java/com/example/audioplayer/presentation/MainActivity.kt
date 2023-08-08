@@ -1,26 +1,20 @@
 package com.example.audioplayer.presentation
 
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.Fragment
 import com.example.audioplayer.R
 import com.example.audioplayer.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : AppCompatActivity(), Listeners {
+class MainActivity : AppCompatActivity() {
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
-
-    private val viewModel: MainViewModel by viewModel()
-    private val musicsAdapter = MusicsAdapter(this)
 
     private val permissionReadExternalStorage =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
@@ -46,16 +40,16 @@ class MainActivity : AppCompatActivity(), Listeners {
                 }
             }
         } else {
-            settingViewModel()
+            launchFragment(ListAudioFragment.newInstance())
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        setupRecyclerView()
         checkPermissions()
     }
+
 
     private fun checkPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -66,10 +60,10 @@ class MainActivity : AppCompatActivity(), Listeners {
             ) {
                 permissionReadMediaAudio.launch(android.Manifest.permission.READ_MEDIA_AUDIO)
             } else {
-                settingViewModel()
+                launchFragment(ListAudioFragment.newInstance())
+
             }
-        }
-        else {
+        } else {
             if (ContextCompat.checkSelfPermission(
                     this,
                     android.Manifest.permission.READ_EXTERNAL_STORAGE
@@ -77,29 +71,21 @@ class MainActivity : AppCompatActivity(), Listeners {
             ) {
                 permissionReadExternalStorage.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
             } else {
-                settingViewModel()
+                launchFragment(ListAudioFragment.newInstance())
             }
         }
     }
 
-    private fun settingViewModel() {
-        viewModel.observe(this) {
-            musicsAdapter.submitList(it)
-        }
-        viewModel.getAllAudio()
-    }
-
-    private fun setupRecyclerView() {
-        binding.musics.adapter = musicsAdapter
-        binding.musics.setHasFixedSize(true)
-        binding.musics.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
-    }
-
-    override fun onClickListeners(position: Int, title: String) {
-        //viewModel.set(position)
-        val intent = Intent(this, AudioService::class.java).apply {
-            putExtra("TITLE", title)
-        }
-        ContextCompat.startForegroundService(this, intent)
+    private fun launchFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in,
+                R.anim.fade_out,
+                R.anim.fade_in,
+                R.anim.slide_out
+            )
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }
