@@ -18,10 +18,11 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.media.session.MediaButtonReceiver
 import com.example.audioplayer.R
 import com.example.audioplayer.core.log
 import com.example.audioplayer.core.s149
+import java.util.Timer
+import java.util.TimerTask
 
 class AudioService : Service() {
 
@@ -48,11 +49,34 @@ class AudioService : Service() {
         }
     }
 
+    private var timer = Timer()
+
     override fun onCreate() {
         super.onCreate()
         getAllAudio()
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         registerReceiver(receiverRedirect, IntentFilter("DATA"))
+        registerReceiver(receiverUpdate, IntentFilter("UPDATE"))
+    }
+
+    private val receiverUpdate = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val update = intent?.getBooleanExtra("update", false) ?: false
+            if (!update) timer.cancel()
+            else settingTimer()
+        }
+    }
+
+    private fun settingTimer() {
+        timer = Timer()
+        timer.scheduleAtFixedRate(object  : TimerTask() {
+            override fun run() {
+                log("RUN")
+                sendBroadcast(Intent("DATA").apply {
+                    putExtra("currentPosition", mediaPlayer.currentPosition)
+                })
+            }
+        }, 0, 1000)
     }
 
     private fun getAllAudio() {
@@ -88,6 +112,13 @@ class AudioService : Service() {
         val action = intent?.getStringExtra("ACTION") ?: ""
 
         when (action) {
+            "data" -> {
+                sendBroadcast(Intent("DATA").apply {
+                    putExtra("duration", mediaPlayer.duration)
+                    putExtra("name", currentMusicName)
+                    putExtra("currentPosition", mediaPlayer.currentPosition)
+                })
+            }
             "pause" -> {
                 val pause = Intent(this, AudioService::class.java).apply {
                     putExtra("ACTION", "pause")
@@ -105,6 +136,7 @@ class AudioService : Service() {
                 var state = PlaybackStateCompat.STATE_PLAYING
 
                 if (isRun) {
+                    timer.cancel()
                     mediaPlayer.pause()
                     notificationBuild.actions[1] =
                         Notification.Action(R.drawable.ic_start, "pause", pausePendingIntent)
@@ -116,6 +148,7 @@ class AudioService : Service() {
                     sendBroadcast(Intent("ACTION").apply {
                         putExtra("pause", R.drawable.ic_pause)
                     })
+                    settingTimer()
                     mediaPlayer.start()
 
                     notificationBuild.actions[1] =
@@ -140,8 +173,10 @@ class AudioService : Service() {
                 updateNotification(currentMusicName, isPause)
                 settingMediaPlayer(isPause = isPause)
                 setMetadata()
-                sendBroadcast(Intent("ACTION").apply {
-                    putExtra("skip", currentMusicName)
+                sendBroadcast(Intent("DATA").apply {
+                    putExtra("duration", mediaPlayer.duration)
+                    putExtra("name", currentMusicName)
+                    putExtra("currentPosition", mediaPlayer.currentPosition)
                 })
             }
 
@@ -153,8 +188,10 @@ class AudioService : Service() {
                 updateNotification(currentMusicName, isPause)
                 settingMediaPlayer(isPause = isPause)
                 setMetadata()
-                sendBroadcast(Intent("ACTION").apply {
-                    putExtra("skip", currentMusicName)
+                sendBroadcast(Intent("DATA").apply {
+                    putExtra("duration", mediaPlayer.duration)
+                    putExtra("name", currentMusicName)
+                    putExtra("currentPosition", mediaPlayer.currentPosition)
                 })
             }
 
@@ -166,7 +203,7 @@ class AudioService : Service() {
             }
 
             else -> {
-                val currentMusicName = intent?.getStringExtra("TITLE") ?: ""
+                currentMusicName = intent?.getStringExtra("TITLE") ?: ""
                 if (isRun) {
                     setPlaybackState()
                     settingMediaPlayer(currentMusicName)
@@ -386,6 +423,8 @@ class AudioService : Service() {
         mediaPlayer.stop()
         mediaPlayer.release()
         unregisterReceiver(receiverRedirect)
+        unregisterReceiver(receiverUpdate)
+        timer.cancel()
         super.onDestroy()
     }
 

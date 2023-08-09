@@ -4,22 +4,24 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.TranslateAnimation
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import com.example.audioplayer.R
 import com.example.audioplayer.core.log
 import com.example.audioplayer.core.s149
 import com.example.audioplayer.databinding.FragmentListAudioBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
-class ListAudioFragment : Fragment(), Listeners {
+class ListAudioFragment : BaseFragment(), Listeners {
     private var _binding: FragmentListAudioBinding? = null
     private val binding: FragmentListAudioBinding
         get() = _binding!!
@@ -42,11 +44,10 @@ class ListAudioFragment : Fragment(), Listeners {
         settingClickListener()
     }
 
-    private val receiverUi = object : BroadcastReceiver() {
+    private val receiverUi = object : ActionBroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            val pause = intent?.getIntExtra("pause", -1) ?: -1
-            val skip = intent?.getStringExtra("skip") ?: ""
-            val stop = intent?.getStringExtra("stop") ?: ""
+            super.onReceive(context, intent)
+            val visible = intent?.getStringExtra("visible") ?: ""
 
             if (pause != -1)
                 binding.icPause.setImageResource(pause)
@@ -59,6 +60,8 @@ class ListAudioFragment : Fragment(), Listeners {
                 binding.container.visibility = View.INVISIBLE
             }
 
+            if (visible.isNotEmpty())
+                binding.root.visibility = View.VISIBLE
         }
     }
 
@@ -75,37 +78,29 @@ class ListAudioFragment : Fragment(), Listeners {
 
     private fun settingClickListener() {
         binding.container.setOnClickListener {
-            TODO("AUDIO FRAGMENT")
+            binding.root.visibility = View.GONE
+            parentFragmentManager.beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in,
+                    R.anim.fade_out,
+                    R.anim.fade_in,
+                    R.anim.slide_out
+                )
+                .add(R.id.fragmentContainer, AudioFragment.newInstance())
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.icSkipPrevious.setOnClickListener {
-            val skipPrevious = Intent(requireContext(), AudioService::class.java).apply {
-                putExtra(
-                    "ACTION",
-                    "skipPrevious"
-                )
-            }
-            ContextCompat.startForegroundService(requireContext(), skipPrevious)
+            skipPrevious()
         }
 
         binding.icPause.setOnClickListener {
-            val pause = Intent(requireContext(), AudioService::class.java).apply {
-                putExtra(
-                    "ACTION",
-                    "pause"
-                )
-            }
-            ContextCompat.startForegroundService(requireContext(), pause)
+            pause()
         }
 
         binding.icSkipNext.setOnClickListener {
-            val skipNext = Intent(requireContext(), AudioService::class.java).apply {
-                putExtra(
-                    "ACTION",
-                    "skipNext"
-                )
-            }
-            ContextCompat.startForegroundService(requireContext(), skipNext)
+            skipNext()
         }
     }
 
@@ -128,6 +123,12 @@ class ListAudioFragment : Fragment(), Listeners {
     }
 
     override fun onClickListeners(position: Int, title: String) {
+        /*val uri = Uri.parse(title)
+        val mmr = MediaMetadataRetriever()
+        mmr.setDataSource(requireContext(), uri)
+        val durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        log((durationStr!!.toLong()) / 1000)*/
+
         if (binding.container.visibility != View.VISIBLE) {
             binding.container.visibility = View.VISIBLE
             binding.container.animate().translationY(0f)

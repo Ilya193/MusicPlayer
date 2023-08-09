@@ -1,13 +1,16 @@
 package com.example.audioplayer.presentation
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.audioplayer.R
+import com.example.audioplayer.core.log
 import com.example.audioplayer.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 
@@ -48,6 +51,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         checkPermissions()
+
+        onBackPressedDispatcher.addCallback(this) {
+            val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+
+            if (fragment is AudioFragment) {
+                supportFragmentManager.popBackStack()
+                sendBroadcast(Intent("ACTION").putExtra("visible", "visible"))
+                sendBroadcast(Intent("UPDATE").apply {
+                    putExtra("update", false)
+                })
+            }
+        }
     }
 
 
