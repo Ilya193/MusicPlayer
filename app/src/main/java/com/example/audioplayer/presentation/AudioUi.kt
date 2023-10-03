@@ -1,5 +1,6 @@
 package com.example.audioplayer.presentation
 
+import com.example.audioplayer.R
 import com.example.audioplayer.core.Comparing
 
 sealed class AudioUi(
@@ -28,5 +29,19 @@ sealed class AudioUi(
          }*/
     }
 
-    object Empty : AudioUi()
+    data class Message(val msg: Int = R.string.music_not_found) : AudioUi()
+    object Banned : AudioUi()
+}
+
+sealed class AudioUiState {
+
+    data class Success(val data: List<AudioUi>) : AudioUiState()
+
+    object Waiting : AudioUiState()
+
+    object Banned : AudioUiState()
+
+    object Allowed : AudioUiState()
+
+    object Empty : AudioUiState()
 }

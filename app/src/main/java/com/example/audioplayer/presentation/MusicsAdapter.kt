@@ -42,7 +42,7 @@ class MusicsAdapter(
     inner class MusicViewHolder(private val view: AudioItemBinding) :
         BaseMusicViewHolder(view.root) {
         override fun bind(item: AudioUi) {
-            view.nameAudio.text = item.title
+            view.tvTitleAudio.text = item.title
             view.root.setOnClickListener {
                 listeners.onClickListeners(adapterPosition, getItem(adapterPosition).fullTitle)
             }

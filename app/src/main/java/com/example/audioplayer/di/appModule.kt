@@ -24,7 +24,7 @@ val appModule = module {
     }
 
     viewModel<MainViewModel> {
-        MainViewModel(get(), get())
+        MainViewModel(get())
     }
 
     factory<Communication<List<AudioUi>>> {

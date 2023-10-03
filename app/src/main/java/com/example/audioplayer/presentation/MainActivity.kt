@@ -13,11 +13,14 @@ import com.example.audioplayer.R
 import com.example.audioplayer.core.log
 import com.example.audioplayer.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity() {
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
+
+    private val viewModel: MainViewModel by viewModel()
 
     private val permissionReadExternalStorage =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
@@ -35,22 +38,21 @@ class MainActivity : AppCompatActivity() {
         if (!result) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (shouldShowRequestPermissionRationale(permission)) {
-                    Snackbar.make(
-                        binding.root,
-                        getString(R.string.need_permission),
-                        Snackbar.LENGTH_LONG
-                    ).show()
+                    viewModel.setState(AudioUiState.Banned)
                 }
             }
-        } else {
-            launchFragment(ListAudioFragment.newInstance())
         }
+        else viewModel.setState(AudioUiState.Allowed)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         checkPermissions()
+
+        supportFragmentManager.setFragmentResultListener("permission", this) { _, _ ->
+            checkPermissions()
+        }
 
         onBackPressedDispatcher.addCallback(this) {
             val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
@@ -73,10 +75,10 @@ class MainActivity : AppCompatActivity() {
                     android.Manifest.permission.READ_MEDIA_AUDIO
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
+                viewModel.setState(AudioUiState.Waiting)
                 permissionReadMediaAudio.launch(android.Manifest.permission.READ_MEDIA_AUDIO)
             } else {
-                launchFragment(ListAudioFragment.newInstance())
-
+                viewModel.setState(AudioUiState.Allowed)
             }
         } else {
             if (ContextCompat.checkSelfPermission(
@@ -84,23 +86,11 @@ class MainActivity : AppCompatActivity() {
                     android.Manifest.permission.READ_EXTERNAL_STORAGE
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
+                viewModel.setState(AudioUiState.Waiting)
                 permissionReadExternalStorage.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
             } else {
-                launchFragment(ListAudioFragment.newInstance())
+                viewModel.setState(AudioUiState.Allowed)
             }
         }
-    }
-
-    private fun launchFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                R.anim.slide_in,
-                R.anim.fade_out,
-                R.anim.fade_in,
-                R.anim.slide_out
-            )
-            .replace(R.id.fragmentContainer, fragment)
-            .addToBackStack(null)
-            .commit()
     }
 }

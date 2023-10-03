@@ -14,7 +14,7 @@ sealed class AudioDomain : ToMapper<AudioUi> {
     }
 
     object Empty : AudioDomain() {
-        override fun map(): AudioUi = AudioUi.Empty
+        override fun map(): AudioUi = AudioUi.Message()
     }
 }
 

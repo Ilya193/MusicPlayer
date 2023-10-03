@@ -35,6 +35,7 @@ class AudioService : Service() {
     private var isRun = false
     private var isPause = false
     private var currentMusicName = ""
+    private var timer = Timer()
 
     private lateinit var notificationManager: NotificationManager
     private lateinit var notification: NotificationCompat.Builder
@@ -49,7 +50,6 @@ class AudioService : Service() {
         }
     }
 
-    private var timer = Timer()
 
     override fun onCreate() {
         super.onCreate()
@@ -71,7 +71,6 @@ class AudioService : Service() {
         timer = Timer()
         timer.scheduleAtFixedRate(object  : TimerTask() {
             override fun run() {
-                log("RUN")
                 sendBroadcast(Intent("DATA").apply {
                     putExtra("currentPosition", mediaPlayer.currentPosition)
                 })
@@ -387,13 +386,12 @@ class AudioService : Service() {
             }
 
             override fun onStop() {
-                log("ON STOP")
                 ContextCompat.startForegroundService(this@AudioService, stop)
             }
         })
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.drawable.ic_music)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setStyle(

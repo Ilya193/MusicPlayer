@@ -14,8 +14,8 @@ interface AudioInteractor {
             audioRepository.getAllAudio().collect {
                 val musicsDomain = mutableListOf<AudioDomain>()
 
+                var index = 0
                 it.forEach { audio ->
-                    var index = 0
                     val title = audio.title
                     var filterTitle = ""
                     if (title.takeLast(3) == "mp3" || title.takeLast(3) == "mp4") {

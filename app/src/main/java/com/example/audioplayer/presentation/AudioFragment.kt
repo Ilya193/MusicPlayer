@@ -11,8 +11,6 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import com.example.audioplayer.R
 import com.example.audioplayer.core.log
 import com.example.audioplayer.core.s149
 import com.example.audioplayer.databinding.FragmentAudioBinding
@@ -33,7 +31,7 @@ class AudioFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.textView.setOnClickListener {
+        binding.tvTitle.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
@@ -71,19 +69,15 @@ class AudioFragment : BaseFragment() {
                 val min = duration / 60000
                 val sec = duration / 1000
                 val secPrint = sec - min * 60
-                if (secPrint < 10) binding.duration.text = "${duration / 60000}:0$secPrint"
-                else binding.duration.text = "${duration / 60000}:$secPrint"
+                if (secPrint < 10) binding.tvDuration.text = "${duration / 60000}:0$secPrint"
+                else binding.tvDuration.text = "${duration / 60000}:$secPrint"
             }
             if (currentPosition != -1) {
                 binding.seekbar.progress = currentPosition / 1000
-                if ((currentPosition / 1000) < 10) binding.currentPosition.text = "${currentPosition / 60000}:0${currentPosition / 1000}"
-                else binding.currentPosition.text = "${currentPosition / 60000}:${currentPosition / 1000}"
+                if ((currentPosition / 1000) < 10) binding.tvCurrentPosition.text = "${currentPosition / 60000}:0${currentPosition / 1000}"
+                else binding.tvCurrentPosition.text = "${currentPosition / 60000}:${currentPosition / 1000}"
             }
-            if (name.isNotEmpty()) binding.textView.text = name.s149()
-
-            /*log("duration: ${duration / 60000}:${duration / 1000}")
-            log("name $name")
-            log("currentPosition ${currentPosition / 1000}")*/
+            if (name.isNotEmpty()) binding.tvTitle.text = name.s149()
         }
     }
 
@@ -95,7 +89,7 @@ class AudioFragment : BaseFragment() {
                 binding.icPause.setImageResource(pause)
 
             if (skip.isNotEmpty())
-                binding.textView.text = skip.s149()
+                binding.tvTitle.text = skip.s149()
 
             if (stop.isNotEmpty()) {
                 parentFragmentManager.popBackStack()
@@ -110,8 +104,8 @@ class AudioFragment : BaseFragment() {
     override fun onResume() {
         super.onResume()
 
-        requireContext().registerReceiver(receiverData, IntentFilter("DATA"))
-        requireContext().registerReceiver(receiverUi, IntentFilter("ACTION"))
+        context?.registerReceiver(receiverData, IntentFilter("DATA"))
+        context?.registerReceiver(receiverUi, IntentFilter("ACTION"))
 
         requireContext().sendBroadcast(Intent("UPDATE").apply {
             putExtra("update", true)
