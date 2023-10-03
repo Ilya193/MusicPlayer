@@ -31,6 +31,8 @@ sealed class AudioUi(
 
     data class Message(val msg: Int = R.string.music_not_found) : AudioUi()
     object Banned : AudioUi()
+    object FullBanned : AudioUi()
+
 }
 
 sealed class AudioUiState {
@@ -40,6 +42,8 @@ sealed class AudioUiState {
     object Waiting : AudioUiState()
 
     object Banned : AudioUiState()
+
+    object FullBanned : AudioUiState()
 
     object Allowed : AudioUiState()
 

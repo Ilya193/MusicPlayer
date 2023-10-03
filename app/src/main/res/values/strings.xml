@@ -12,4 +12,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="banned">Музыка не найдена, так как не предоставлено разрешение</string>
     <string name="request_permission">Запросить разрешение</string>
+    <string name="full_banned">Я не работаю из-за полного запрета на чтение файлов</string>
 </resources>

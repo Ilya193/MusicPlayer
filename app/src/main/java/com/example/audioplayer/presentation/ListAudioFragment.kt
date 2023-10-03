@@ -58,6 +58,22 @@ class ListAudioFragment : BaseFragment(), Listeners {
 
             addBinding<AudioUi.Banned, BannedLayoutBinding> {
                 listeners {
+                    bind {
+                        tvMessage.text = context?.getString(R.string.banned)
+                    }
+
+                    btnRetry.onClick {
+                        setFragmentResult("permission", bundleOf())
+                    }
+                }
+            }
+
+            addBinding<AudioUi.FullBanned, BannedLayoutBinding> {
+                bind {
+                    tvMessage.text = context?.getString(R.string.full_banned)
+                }
+
+                listeners {
                     btnRetry.onClick {
                         setFragmentResult("permission", bundleOf())
                     }
@@ -148,6 +164,7 @@ class ListAudioFragment : BaseFragment(), Listeners {
                 is AudioUiState.Empty -> adapter.submitList(listOf(AudioUi.Message()))
                 is AudioUiState.Waiting -> adapter.submitList(listOf(AudioUi.Message(R.string.wait)))
                 is AudioUiState.Banned -> adapter.submitList(listOf(AudioUi.Banned))
+                is AudioUiState.FullBanned -> adapter.submitList(listOf(AudioUi.FullBanned))
                 else -> {}
             }
         }

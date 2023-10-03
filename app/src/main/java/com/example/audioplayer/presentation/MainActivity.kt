@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
                 if (shouldShowRequestPermissionRationale(permission)) {
                     viewModel.setState(AudioUiState.Banned)
                 }
+                else viewModel.setState(AudioUiState.FullBanned)
             }
         }
         else viewModel.setState(AudioUiState.Allowed)

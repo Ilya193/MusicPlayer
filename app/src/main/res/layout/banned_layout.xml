@@ -19,8 +19,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textSize="18sp"
-            android:layout_marginHorizontal="16dp"
-            android:text="@string/banned"/>
+            android:layout_marginHorizontal="16dp" />
 
         <Button
             android:id="@+id/btnRetry"

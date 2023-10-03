@@ -42,6 +42,7 @@ class MainViewModel(
         when (state) {
             is AudioUiState.Allowed -> getAllAudio()
             is AudioUiState.Banned -> _uiState.value = state
+            is AudioUiState.FullBanned -> _uiState.value = state
             is AudioUiState.Waiting -> _uiState.value = state
             else -> {}
         }
